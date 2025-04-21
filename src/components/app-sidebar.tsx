@@ -5,6 +5,7 @@ import {
   HelpCircleIcon,
   InfinityIcon,
   MessageCircleIcon,
+  MoonIcon,
   PlusCircleIcon,
   SettingsIcon,
   SparkleIcon,
@@ -30,9 +31,9 @@ import { NavSecondary } from './nav-secondary';
 // This is sample data.
 const data = {
   user: {
-    name: 'shadcn',
-    email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
+    name: 'donatedsalt',
+    email: 'ds@example.com',
+    avatar: '/avatars/donatedsalt.jpg',
   },
   AI: [
     {
@@ -50,16 +51,19 @@ const data = {
     {
       name: 'Design Engineering',
       url: '#',
+      action: async () => {},
       icon: MessageCircleIcon,
     },
     {
       name: 'Sales & Marketing',
       url: '#',
+      action: async () => {},
       icon: MessageCircleIcon,
     },
     {
       name: 'Travel',
       url: '#',
+      action: async () => {},
       icon: MessageCircleIcon,
     },
   ],
@@ -67,11 +71,21 @@ const data = {
     {
       title: 'Get Help',
       url: '#',
+      action: async () => {},
       icon: HelpCircleIcon,
+    },
+    {
+      title: 'Change Theme',
+      url: '#',
+      action: async () => {
+        document.documentElement.classList.toggle('dark');
+      },
+      icon: MoonIcon,
     },
     {
       title: 'Settings',
       url: '#',
+      action: async () => {},
       icon: SettingsIcon,
     },
   ],
@@ -85,7 +99,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          {/* <SidebarGroupLabel>Chat History</SidebarGroupLabel> */}
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>

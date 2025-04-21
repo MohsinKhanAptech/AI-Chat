@@ -25,6 +25,7 @@ export function NavMain({
   items: {
     name: string;
     url: string;
+    action: () => Promise<void>;
     icon: LucideIcon;
   }[];
 }) {
@@ -36,7 +37,7 @@ export function NavMain({
       <SidebarMenu>
         {items.map((item) => (
           <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
+            <SidebarMenuButton onClick={item.action} asChild>
               <a href={item.url}>
                 <item.icon />
                 <span>{item.name}</span>
