@@ -14,6 +14,7 @@ import {
 import { Input } from './components/ui/input';
 import { Button } from './components/ui/button';
 import { SendIcon } from 'lucide-react';
+import { Chat } from './components/chat';
 
 export default function Page() {
   return (
@@ -34,8 +35,13 @@ export default function Page() {
           </div>
         </header>
         <div className='flex flex-1 p-4 pt-0'>
-          <div className='flex flex-1 items-end rounded-xl bg-muted/100'>
-            <div className='flex flex-1 gap-2 m-8'>
+          <div className='flex flex-1 flex-col justify-end gap-8 rounded-xl m-8'>
+            <Chat variant={'user'} children='pookie wookie dookie' />
+            <Chat
+              variant={'bot'}
+              children='Laborum ut ad amet eu aliquip consectetur fugiat reprehenderit qui et. Est nisi amet sint velit eu cillum dolore cillum irure ut non mollit. Aliquip non ad non tempor est eu officia culpa incididunt eu. Dolor incididunt enim enim laboris officia veniam.'
+            />
+            <div className='flex gap-2'>
               <Input
                 className='bg-background'
                 type='text'
