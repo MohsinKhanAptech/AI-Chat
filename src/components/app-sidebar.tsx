@@ -3,17 +3,17 @@
 import * as React from 'react';
 import {
   HelpCircleIcon,
-  InfinityIcon,
+  LucideIcon,
   MessageCircleIcon,
   MoonIcon,
   PlusCircleIcon,
   SettingsIcon,
-  SparkleIcon,
 } from 'lucide-react';
 
+import { ModelSwitcher } from '@/components/model-switcher';
 import { NavMain } from '@/components/nav-main';
+import { NavSecondary } from '@/components/nav-secondary';
 import { NavUser } from '@/components/nav-user';
-import { AISwitcher } from '@/components/ai-switcher';
 import {
   Sidebar,
   SidebarContent,
@@ -26,83 +26,92 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar';
-import { NavSecondary } from './nav-secondary';
+import { ConversationContext, Model } from '@/components/conversation';
 
-// This is sample data.
-const data = {
-  user: {
-    name: 'donatedsalt',
-    email: 'ds@example.com',
-    avatar: '/avatars/donatedsalt.jpg',
-  },
-  AI: [
-    {
-      name: 'Gemini',
-      logo: SparkleIcon,
-      plan: 'Hosted Model',
-    },
-    {
-      name: 'Llama',
-      logo: InfinityIcon,
-      plan: 'Local Model',
-    },
-  ],
-  navMain: [
-    {
-      name: 'Design Engineering',
-      url: '#',
-      action: async () => {},
-      icon: MessageCircleIcon,
-    },
-    {
-      name: 'Sales & Marketing',
-      url: '#',
-      action: async () => {},
-      icon: MessageCircleIcon,
-    },
-    {
-      name: 'Travel',
-      url: '#',
-      action: async () => {},
-      icon: MessageCircleIcon,
-    },
-  ],
-  navSecondary: [
-    {
-      title: 'Get Help',
-      url: '#',
-      action: async () => {},
-      icon: HelpCircleIcon,
-    },
-    {
-      title: 'Change Theme',
-      url: '#',
-      action: async () => {
-        document.documentElement.classList.toggle('dark');
-      },
-      icon: MoonIcon,
-    },
-    {
-      title: 'Settings',
-      url: '#',
-      action: async () => {},
-      icon: SettingsIcon,
-    },
-  ],
+type NavUser = {
+  name: string;
+  email: string;
+  avatar: string;
+};
+type NavModel = Model;
+type NavItem = {
+  id: string;
+  title: string;
+  url: string;
+  action: () => Promise<void>;
+  icon: LucideIcon;
+};
+type NavData = {
+  user: NavUser;
+  model: NavModel[];
+  navMain: NavItem[];
+  navSecondary: NavItem[];
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const conversationContext = React.useContext(ConversationContext);
+
+  const data: NavData = {
+    user: {
+      name: 'donatedsalt',
+      email: 'ds@example.com',
+      avatar: '/avatars/donatedsalt.jpg',
+    },
+    model: conversationContext!.Models,
+    navMain:
+      conversationContext?.activeModel.conversations.map((conversation) => ({
+        id: conversation.id,
+        title: conversation.title,
+        url: '#',
+        action: async () => {
+          conversationContext?.setActiveConversation(conversation);
+        },
+        icon: MessageCircleIcon,
+      })) || [],
+    navSecondary: [
+      {
+        id: '1',
+        title: 'Get Help',
+        url: '#',
+        action: async () => {},
+        icon: HelpCircleIcon,
+      },
+      {
+        id: '2',
+        title: 'Change Theme',
+        url: '#',
+        action: async () => {
+          document.documentElement.classList.toggle('dark');
+        },
+        icon: MoonIcon,
+      },
+      {
+        id: '3',
+        title: 'Settings',
+        url: '#',
+        action: async () => {},
+        icon: SettingsIcon,
+      },
+    ],
+  };
+
+  React.useEffect(() => {}, []);
+
+  function handleNewChat() {
+    conversationContext?.setActiveConversation(null);
+  }
+
   return (
     <Sidebar collapsible='icon' {...props}>
       <SidebarHeader>
-        <AISwitcher AI={data.AI} />
+        <ModelSwitcher Model={data.model} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton tooltip='New Chat'>
+                <SidebarMenuButton onClick={handleNewChat} tooltip='New Chat'>
                   <PlusCircleIcon />
                   <span>New Chat</span>
                 </SidebarMenuButton>
@@ -120,3 +129,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     </Sidebar>
   );
 }
+
+export type { NavUser, NavModel, NavItem, NavData };

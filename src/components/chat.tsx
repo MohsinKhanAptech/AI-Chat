@@ -1,20 +1,13 @@
 import * as React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
-import { ScrollArea } from './ui/scroll-area';
-import { Input } from './ui/input';
-import { SendIcon } from 'lucide-react';
-import { Button } from './ui/button';
-import { GoogleGenAI } from '@google/genai';
 import Markdown from 'react-markdown';
+import { SendIcon } from 'lucide-react';
+import { cva, type VariantProps } from 'class-variance-authority';
 
 import { cn } from '@/lib/utils';
-
-// type ChatContextProps = {
-//   chats: Array<string>;
-//   setChats: React.Dispatch<React.SetStateAction<Array<string>>>;
-// };
-
-// const ChatContext = React.createContext<ChatContextProps | null>(null);
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ConversationContext } from '@/components/conversation';
 
 const chatVariants = cva('rounded-md text-sm font-medium transition-all', {
   variants: {
@@ -46,22 +39,48 @@ function Chat({
   );
 }
 
-function ChatContainer({ ...props }) {
-  const [conversation, setConversation] = React.useState<Array<string>>([]);
+function ChatProvider({ ...props }) {
+  const conversationContext = React.useContext(ConversationContext);
   const [userPromt, setUserPrompt] = React.useState<string>('');
   const [disabled, setDisabled] = React.useState<boolean>(false);
 
-  // React.useEffect(() => {
-  //   const c = [];
-  //   for (let i = 0; i < 10; i++) {
-  //     c.push(`Chat ${i}`);
-  //   }
-  //   setConversation(c);
-  // }, []);
+  function updateConversations() {
+    conversationContext?.setModels((prev) => {
+      const updatedConversations = prev.map((model) => {
+        if (model.name === conversationContext?.activeModel.name) {
+          return {
+            ...model,
+            conversations: model.conversations.map((conversation) => {
+              if (
+                conversation.id === conversationContext?.activeConversation?.id
+              ) {
+                return {
+                  ...conversationContext?.activeConversation,
+                  messages: conversationContext?.activeConversation.messages,
+                };
+              }
+              return conversation;
+            }),
+          };
+        }
+        return model;
+      });
+      return updatedConversations;
+    });
+  }
 
   function addChat(chat: string | undefined) {
     if (!chat) return;
-    setConversation((prev) => [...prev, chat]);
+    conversationContext?.setActiveConversation((prev) => {
+      if (prev) {
+        return {
+          ...prev,
+          messages: [...prev.messages, chat],
+        };
+      }
+      return null;
+    });
+    updateConversations();
   }
 
   // function removeChat(index: number) {
@@ -69,7 +88,16 @@ function ChatContainer({ ...props }) {
   // }
 
   function removeLastChat() {
-    setConversation((prev) => prev.slice(0, -1));
+    conversationContext?.setActiveConversation((prev) => {
+      if (prev) {
+        return {
+          ...prev,
+          messages: prev.messages.slice(0, -1),
+        };
+      }
+      return null;
+    });
+    updateConversations();
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -82,26 +110,23 @@ function ChatContainer({ ...props }) {
     setUserPrompt('');
     setDisabled(true);
 
-    // use your API key
-    const ai = new GoogleGenAI({
-      apiKey: 'API_KEY',
-    });
+    const response = {
+      text: `This is a test response from the AI model. to prompt: ${prompt}`,
+    };
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.0-flash',
-      contents: prompt,
-    });
+    setTimeout(() => {
+      removeLastChat();
+      addChat(response.text);
+      console.log(response);
 
-    removeLastChat();
-    addChat(response.text);
-    console.log(response);
-
-    setDisabled(false);
+      setDisabled(false);
+    }, 1000);
   }
 
   return (
     <>
-      {conversation.length === 0 ? (
+      {conversationContext?.activeConversation === null ||
+      conversationContext?.activeConversation?.messages.length === 0 ? (
         <div className='flex flex-1 flex-col justify-center items-center gap-2'>
           <span className='text-4xl font-bold'>Welcome!</span>
           <span>What's on your mind?</span>
@@ -109,11 +134,13 @@ function ChatContainer({ ...props }) {
       ) : (
         <ScrollArea className='h-[calc(100vh-12.3rem)]'>
           <div className='flex flex-1 flex-col justify-end gap-8' {...props}>
-            {conversation.map((chat, index) => (
-              <Chat key={index} variant={index % 2 === 0 ? 'user' : 'bot'}>
-                <Markdown>{chat}</Markdown>
-              </Chat>
-            ))}
+            {conversationContext?.activeConversation?.messages.map(
+              (message, index) => (
+                <Chat key={index} variant={index % 2 === 0 ? 'user' : 'bot'}>
+                  <Markdown>{message}</Markdown>
+                </Chat>
+              )
+            )}
           </div>
         </ScrollArea>
       )}
@@ -135,4 +162,4 @@ function ChatContainer({ ...props }) {
   );
 }
 
-export { Chat, chatVariants, ChatContainer };
+export { Chat, ChatProvider };

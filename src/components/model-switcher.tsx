@@ -18,22 +18,22 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { ConversationContext, Model } from '@/components/conversation';
 
-export function AISwitcher({
-  AI,
-}: {
-  AI: {
-    name: string;
-    logo: React.ElementType;
-    plan: string;
-  }[];
-}) {
+export function ModelSwitcher({ Model }: { Model: Model[] }) {
   const { isMobile } = useSidebar();
-  const [activeAI, setActiveAI] = React.useState(AI[0]);
+  const context = React.useContext(ConversationContext);
 
-  if (!activeAI) {
+  if (
+    !context ||
+    !context.activeModel ||
+    !context.setActiveModel ||
+    !context.setActiveConversation
+  ) {
     return null;
   }
+
+  const { activeModel, setActiveModel, setActiveConversation } = context;
 
   return (
     <SidebarMenu>
@@ -45,11 +45,13 @@ export function AISwitcher({
               className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
             >
               <div className='flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground'>
-                <activeAI.logo className='size-4' />
+                <activeModel.icon className='size-4' />
               </div>
               <div className='grid flex-1 text-left text-sm leading-tight'>
-                <span className='truncate font-semibold'>{activeAI.name}</span>
-                <span className='truncate text-xs'>{activeAI.plan}</span>
+                <span className='truncate font-semibold'>
+                  {activeModel.name}
+                </span>
+                <span className='truncate text-xs'>{activeModel.type}</span>
               </div>
               <ChevronsUpDown className='ml-auto' />
             </SidebarMenuButton>
@@ -61,18 +63,21 @@ export function AISwitcher({
             sideOffset={4}
           >
             <DropdownMenuLabel className='text-xs text-muted-foreground'>
-              AI's
+              AI Models
             </DropdownMenuLabel>
-            {AI.map((ai, index) => (
+            {Model.map((model, index) => (
               <DropdownMenuItem
-                key={ai.name}
-                onClick={() => setActiveAI(ai)}
+                key={model.name}
+                onClick={() => {
+                  setActiveModel(model);
+                  setActiveConversation(null);
+                }}
                 className='gap-2 p-2'
               >
                 <div className='flex size-6 items-center justify-center rounded-sm border'>
-                  <ai.logo className='size-4 shrink-0' />
+                  <model.icon className='size-4 shrink-0' />
                 </div>
-                {ai.name}
+                {model.name}
                 <DropdownMenuShortcut>⌘{index + 1}</DropdownMenuShortcut>
               </DropdownMenuItem>
             ))}

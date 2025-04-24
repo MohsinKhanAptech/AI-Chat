@@ -1,6 +1,7 @@
 'use client';
 
-import { Folder, MoreHorizontal, Trash2, type LucideIcon } from 'lucide-react';
+import * as React from 'react';
+import { Folder, MoreHorizontal, Trash2 } from 'lucide-react';
 
 import {
   DropdownMenu,
@@ -18,29 +19,35 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { ConversationContext } from '@/components/conversation';
+import { NavItem } from '@/components/app-sidebar';
 
 export function NavMain({
   items,
-}: {
-  items: {
-    name: string;
-    url: string;
-    action: () => Promise<void>;
-    icon: LucideIcon;
-  }[];
-}) {
+}: { items: NavItem[] } & React.ComponentPropsWithoutRef<typeof SidebarGroup>) {
+  const conversationContext = React.useContext(ConversationContext);
   const { isMobile } = useSidebar();
+
+  function isActive(id: string): boolean {
+    return conversationContext?.activeConversation?.id === id;
+  }
 
   return (
     <SidebarGroup className='group-data-[collapsible=icon]:hidden'>
-      <SidebarGroupLabel>Chat History</SidebarGroupLabel>
+      <SidebarGroupLabel className='text-nowrap'>
+        Chat History
+      </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
-          <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton onClick={item.action} asChild>
+          <SidebarMenuItem key={item.id}>
+            <SidebarMenuButton
+              isActive={isActive(item.id)}
+              onClick={item.action}
+              asChild
+            >
               <a href={item.url}>
                 <item.icon />
-                <span>{item.name}</span>
+                <span>{item.title}</span>
               </a>
             </SidebarMenuButton>
             <DropdownMenu>
@@ -68,12 +75,6 @@ export function NavMain({
             </DropdownMenu>
           </SidebarMenuItem>
         ))}
-        {/* <SidebarMenuItem>
-          <SidebarMenuButton className='text-sidebar-foreground/70'>
-            <MoreHorizontal className='text-sidebar-foreground/70' />
-            <span>More</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem> */}
       </SidebarMenu>
     </SidebarGroup>
   );
