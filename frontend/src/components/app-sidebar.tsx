@@ -4,7 +4,6 @@ import * as React from 'react';
 import {
   HelpCircleIcon,
   LucideIcon,
-  MessageCircleIcon,
   MoonIcon,
   PlusCircleIcon,
   SettingsIcon,
@@ -13,7 +12,7 @@ import {
 import { ModelSwitcher } from '@/components/model-switcher';
 import { NavMain } from '@/components/nav-main';
 import { NavSecondary } from '@/components/nav-secondary';
-import { NavUser } from '@/components/nav-user';
+import { NavUser as NavUserItem } from '@/components/nav-user';
 import {
   Sidebar,
   SidebarContent,
@@ -26,14 +25,17 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar';
-import { ConversationContext, Model } from '@/components/conversation';
+import {
+  Conversation,
+  ConversationContext,
+  Model,
+} from '@/components/conversation';
 
-type NavUser = {
+type NavUserItem = {
   name: string;
   email: string;
   avatar: string;
 };
-type NavModel = Model;
 type NavItem = {
   id: string;
   title: string;
@@ -42,32 +44,23 @@ type NavItem = {
   icon: LucideIcon;
 };
 type NavData = {
-  user: NavUser;
-  model: NavModel[];
-  navMain: NavItem[];
+  user: NavUserItem;
+  models: Model[];
+  navMain: Conversation[];
   navSecondary: NavItem[];
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const conversationContext = React.useContext(ConversationContext);
+  const context = React.useContext(ConversationContext);
 
   const data: NavData = {
     user: {
       name: 'donatedsalt',
       email: 'ds@example.com',
-      avatar: '/avatars/donatedsalt.jpg',
+      avatar: './avatars/donatedsalt.jpg',
     },
-    model: conversationContext!.Models,
-    navMain:
-      conversationContext?.activeModel.conversations.map((conversation) => ({
-        id: conversation.id,
-        title: conversation.title,
-        url: '#',
-        action: async () => {
-          conversationContext?.setActiveConversation(conversation);
-        },
-        icon: MessageCircleIcon,
-      })) || [],
+    models: context!.models,
+    navMain: context!.conversations,
     navSecondary: [
       {
         id: '1',
@@ -95,16 +88,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     ],
   };
 
-  React.useEffect(() => {}, []);
-
   function handleNewChat() {
-    conversationContext?.setActiveConversation(null);
+    context?.setActiveConversationIndex(context.conversations.length);
   }
 
   return (
     <Sidebar collapsible='icon' {...props}>
       <SidebarHeader>
-        <ModelSwitcher Model={data.model} />
+        <ModelSwitcher models={data.models} />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
@@ -123,11 +114,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className='mt-auto' />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUserItem user={data.user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
   );
 }
 
-export type { NavUser, NavModel, NavItem, NavData };
+export type { NavUserItem, NavItem, NavData };

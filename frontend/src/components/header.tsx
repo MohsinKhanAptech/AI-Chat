@@ -23,7 +23,7 @@ function Header() {
             <BreadcrumbItem>
               <BreadcrumbPage>
                 {conversationContext?.activeConversation?.title ||
-                  conversationContext?.activeModel.name}
+                  conversationContext?.activeModel?.name}
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
