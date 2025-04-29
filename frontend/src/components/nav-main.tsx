@@ -2,11 +2,12 @@
 
 import * as React from 'react';
 import {
-  Folder,
+  Edit3Icon,
   MessageCircleIcon,
   MoreHorizontal,
   Trash2,
 } from 'lucide-react';
+import axios from 'axios';
 
 import {
   DropdownMenu,
@@ -25,7 +26,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { Conversation, ConversationContext } from '@/components/conversation';
-import { Skeleton } from './ui/skeleton';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export function NavMain({
   items,
@@ -41,6 +42,21 @@ export function NavMain({
 
   function handleClick(index: number) {
     context!.setActiveConversationIndex(index);
+  }
+
+  async function handleDelete(index: number) {
+    context!.setConversations((prev) => {
+      if (prev) {
+        return prev.filter((_, i) => i !== index);
+      }
+      return prev;
+    });
+
+    try {
+      await axios.delete(`http://localhost:5000/conversation/${index}`);
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+    }
   }
 
   return (
@@ -84,7 +100,7 @@ export function NavMain({
                       <span>View Chat</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleDelete(index)}>
                       <Trash2 className='text-muted-foreground' />
                       <span>Delete Chat</span>
                     </DropdownMenuItem>
