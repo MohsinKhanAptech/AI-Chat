@@ -60,12 +60,8 @@ app.post('/chat', async (req, res) => {
 
     let response;
 
-    console.log('conversationIndex: ', conversationIndex, ', prompt: ', prompt);
-
     if (conversationIndex === conversations.length) {
       // if new conversation
-      console.log('in new convo');
-      console.log(models, ',\nActiveModelIndex: ', activeModelIndex);
 
       conversations.push({
         title: `Chat ${conversations.length}`,
@@ -88,8 +84,6 @@ app.post('/chat', async (req, res) => {
       conversations[conversationIndex].updated_at = new Date().toISOString();
     } else {
       // if old conversation
-      console.log('in old convo');
-      console.log(models, ',\nActiveModelIndex: ', activeModelIndex);
 
       conversations[conversationIndex].messages.push({
         role: 'user',
